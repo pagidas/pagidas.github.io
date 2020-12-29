@@ -6,8 +6,19 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sat, 19 Dec 2020 21:37:07 +0200</lastBuildDate>
+        <lastBuildDate>Tue, 29 Dec 2020 21:04:09 +0200</lastBuildDate>
         <atom:link href="https://pagidas.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Test Deploy</title>
+            <link>https://pagidas.github.io/posts/test-deploy/</link>
+            <pubDate>Tue, 29 Dec 2020 21:04:09 +0200</pubDate>
+            
+            <guid>https://pagidas.github.io/posts/test-deploy/</guid>
+            <description>Hello, world &amp;ndash; deploy </description>
+            <content type="html"><![CDATA[<h1 id="hello-world----deploy">Hello, world &ndash; deploy</h1>
+]]></content>
+        </item>
         
         <item>
             <title>A very easy-to-wire-up distributed lock solution for scheduled tasks</title>
