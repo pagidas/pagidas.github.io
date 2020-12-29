@@ -3,21 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://pagidas.github.io/posts/</loc>
-    <lastmod>2020-12-29T21:04:09+02:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pagidas.github.io/posts/test-deploy/</loc>
-    <lastmod>2020-12-29T21:04:09+02:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pagidas.github.io/</loc>
-    <lastmod>2020-12-29T21:04:09+02:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://pagidas.github.io/posts/shedlock_poc/</loc>
     <lastmod>2020-12-19T21:37:07+02:00</lastmod>
   </url>
@@ -43,12 +28,22 @@
   </url>
   
   <url>
+    <loc>https://pagidas.github.io/posts/</loc>
+    <lastmod>2020-12-19T21:37:07+02:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://pagidas.github.io/tags/scheduled/</loc>
     <lastmod>2020-12-19T21:37:07+02:00</lastmod>
   </url>
   
   <url>
     <loc>https://pagidas.github.io/tags/</loc>
+    <lastmod>2020-12-19T21:37:07+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/</loc>
     <lastmod>2020-12-19T21:37:07+02:00</lastmod>
   </url>
   
