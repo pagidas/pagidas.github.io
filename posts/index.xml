@@ -116,7 +116,6 @@ to take a look at the <em><strong>pantry logs</strong></em> after reading the in
 <p><img src="./images/orders_logs.png" alt="orders_logs"></p>
 <h4 id="pantry-service">Pantry service</h4>
 <p><img src="./images/pantry_logs.png" alt="pantry_logs"></p>
-<p>Below we see the logs of the ***</p>
 <h3 id="github-repo">Github Repo</h3>
 <p>My demo <em><strong>orchestration saga</strong></em> is 👇</p>
 <pre><code>https://github.com/pagidas/kotlin-kafka-choreography-saga
