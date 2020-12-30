@@ -6,8 +6,132 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sat, 19 Dec 2020 21:37:07 +0200</lastBuildDate>
+        <lastBuildDate>Mon, 28 Dec 2020 14:19:33 +0200</lastBuildDate>
         <atom:link href="https://pagidas.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Choreography saga -- asynchronous microservices</title>
+            <link>https://pagidas.github.io/posts/choreography_saga/</link>
+            <pubDate>Mon, 28 Dec 2020 14:19:33 +0200</pubDate>
+            
+            <guid>https://pagidas.github.io/posts/choreography_saga/</guid>
+            <description>Background Well, where to begin&amp;hellip; Saga is a flow of transactions that updates each service and publishes a message to trigger then next transaction step. This pattern is not something new. It came from a paper back in 1987
+On a very high level, Saga does not use a distributed transaction; it breaks down the transaction into a series of local transactions in each one of the participating services.
+Now that microservices architecture is more frequent when orchestrating a system, plain http request/response communication between microservices can be hard to maintain.</description>
+            <content type="html"><![CDATA[<h2 id="background">Background</h2>
+<h3 id="well-where-to-begin">Well, where to begin&hellip;</h3>
+<p><em><strong>Saga</strong></em> is a flow of transactions that updates each service and
+publishes a message to trigger then next transaction step. This pattern
+is not something new. It came from a paper back in <strong>1987</strong></p>
+<p>On a very high level, <em><strong>Saga</strong></em> does not use a <em><strong>distributed transaction</strong></em>;
+it breaks down the transaction into a series of local transactions in each
+one of the participating services.</p>
+<p><img src="./images/saga_transaction.jpg" alt="saga_transaction"></p>
+<p>Now that <em><strong>microservices</strong></em> architecture is more frequent when orchestrating
+a system, plain <code>http request/response</code> communication between microservices can be hard
+to maintain. In fact, it increases <em>coupling</em>, because both of the services
+need to be <em>available</em> at that specific moment for a flow to happen.
+They&rsquo;re bound to the <em>request/response</em> model.</p>
+<h3 id="saga-design-challenges">Saga design challenges</h3>
+<h4 id="api-design">API design</h4>
+<p>Although, a saga internally uses asynchronous communication, the very first step
+that starts the saga might be triggered synchronously, via an <em><strong>http request</strong></em> like so</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#960050;background-color:#1e0010">POST /orders
+</span></code></pre></div><p>So now we have to cover the issue of <em>when</em> we send back the response.</p>
+<h4 id="implementing-rollbacks">Implementing rollbacks</h4>
+<p>In a <em><strong>distributed transaction</strong></em> you can execute a <code>rollback</code> statement
+that undoes all the updates that have been made so far. But in a saga, given
+that we have <em><strong>local transactions</strong></em> in the services required to execute
+a flow; if one of the steps fails, the steps required before that have already
+committed their changes into their local databases. So we have to explicitly
+undo all that.</p>
+<h4 id="lacking-the-isolation-property-in-acid----acd">Lacking the Isolation property in ACID &ndash; ACD</h4>
+<p>The execution of steps of one saga can interleave with the execution of
+steps of other sagas. That may increase database anomalies such as: <em><strong>dirty reads</strong></em>, etc.
+So we must use countermeasures such as <em><strong>semantic logging</strong></em>, which means
+the <code>state</code> of the <code>Order</code> is <code>PENDING</code> until it becomes <code>APPROVED</code> or <code>REJECTED</code>.</p>
+<h3 id="saga-participants-communication">Saga participants communication</h3>
+<p>As mentioned above, synchronous communication, such as <em><strong>REST</strong></em>, introduces
+<em><strong>temporal coupling</strong></em>, because both client and server need to be available.</p>
+<p>So in sagas it makes more sense to be implemented using
+<em><strong>asynchronous broker-based messaging collaboration</strong></em> where the participants
+communicate through a message broker; that gives us at least once guarantee delivery.</p>
+<p><img src="./images/async_broker_based_messaging.jpg" alt="async_broker_based_messaging"></p>
+<p>If we have those properties, means that even if a saga participant becomes
+unavailable, the message broker is going to keep retrying the delivery of
+that message until the other participant will process it. That guarantees
+the saga will <em><strong>eventually</strong></em> run to completion.</p>
+<h4 id="saga-step">Saga step</h4>
+<p>In such fashion, a saga step is a transaction local to a service.</p>
+<ul>
+<li>Service executes a transaction that updates its database</li>
+<li>And will also send a message or publish an event</li>
+</ul>
+<p>That will trigger the next participant in the saga to execute its own
+local transaction.</p>
+<blockquote>
+<p><em>The interesting thing here is how to make those actions
+in a saga step <em><strong>atomically</strong></em> by not using a <em><strong>distributed transaction</strong></em>.</em></p>
+</blockquote>
+<p><img src="./images/saga_step.jpg" alt="saga_step"></p>
+<h3 id="saga-patterns">Saga patterns</h3>
+<p>A <em><strong>Saga</strong></em> is a sequence of transactions, right? And, mentioned earlier,
+we saw that communication between those transactions are based upon events.
+So the next thought that comes to mind is that, there should be some logic
+somewhere that knows what saga step is executed after another
+&ndash; either a failed or a successful step.</p>
+<p>Here are the two saga patterns based on <em><strong>decision-making</strong></em> aspect:</p>
+<ul>
+<li>Choreography: <em><strong>distributed</strong></em> decision-making</li>
+<li>Orchestration: <em><strong>centralized</strong></em> decision-making</li>
+</ul>
+<p>More details about them <a href="https://microservices.io/patterns/data/saga.html">here</a> 👈</p>
+<h3 id="putting-a-stop-here">Putting a stop here</h3>
+<p>Well this post is not supposed to discuss all the implementation details
+and challenges on how to implement sagas. It would be a book to do that,
+and there are out there already!</p>
+<h2 id="my-demo-app">My demo app</h2>
+<p>I wanted to try to implement a saga on my own, using as much <em><strong>lightweight</strong></em>
+libraries as I could &ndash; to have more control and get more knowledge.</p>
+<p>So the concept is similar to <em><strong>orders-and-customers</strong></em>. The idea is that you
+want to order a <em><strong>pantry_item</strong></em> for which you&rsquo;ve put a quantity limit. For example,
+you can&rsquo;t have more than 4 pieces of broccoli in your pantry at home.</p>
+<p>In that fashion, we have:</p>
+<ul>
+<li>orders</li>
+<li>pantry</li>
+</ul>
+<p><strong>Orders</strong> is the service where you can create/update orders about <strong>pantry_items</strong></p>
+<p><strong>Pantry</strong> is the service that manages if an order about a specific <strong>pantry_item</strong>
+has exceeded its limit or not.</p>
+<p><img src="./images/demo_architecture_design.jpg" alt="demo_architecture_design"></p>
+<h3 id="logs">Logs</h3>
+<p>As seen in the design picture above, the saga starts with a typical
+http request to <em>create a new order</em> The correct way to read the logs is
+to take a look at the <em><strong>pantry logs</strong></em> after reading the in the <em><strong>orders logs</strong></em></p>
+<pre><code>&quot;Pushing to tpic: order-events message: {...}&quot;
+</code></pre><p>After <em><strong>orders</strong></em> publishes a message about the order creation, that&rsquo;s where
+<em><strong>pantry</strong></em> starts its lifecycle, consuming that message.</p>
+<h4 id="orders-service">Orders service</h4>
+<p><img src="./images/orders_logs.png" alt="orders_logs"></p>
+<h4 id="pantry-service">Pantry service</h4>
+<p><img src="./images/pantry_logs.png" alt="pantry_logs"></p>
+<p>Below we see the logs of the ***</p>
+<h3 id="github-repo">Github Repo</h3>
+<p>My demo <em><strong>orchestration saga</strong></em> is 👇</p>
+<pre><code>https://github.com/pagidas/kotlin-kafka-choreography-saga
+</code></pre><p>I put as much effort as I could to implement it without using heavyweight frameworks.
+So it&rsquo;s all out there, explicitly, from the <em><strong>kafka consumers/producers</strong></em>, basic
+<em><strong>jdbc</strong></em> for <em><strong>postgresql</strong></em>, up to simple <em><strong>web controllers</strong></em>. The only fancy bit
+might be the use of <em><strong>Kotlin</strong></em> which I find myself playing around with lately.</p>
+<p>I think my demo app, along with the talk I&rsquo;m referencing down below, could be a great start to
+get your hands in <em><strong>sagas</strong></em> and their challenges</p>
+<p>That&rsquo;s it, folks, I hope you enjoyed!</p>
+<h2 id="references">References</h2>
+<p>It&rsquo;s all here! <a href="https://www.youtube.com/watch?v=kyNL7yCvQQc">click me!</a></p>
+<p>An in-depth talk about <em><strong>asynchronous microservices</strong></em> by <em>Chris Richardson</em></p>
+]]></content>
+        </item>
         
         <item>
             <title>A very easy-to-wire-up distributed lock solution for scheduled tasks</title>
