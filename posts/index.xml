@@ -36,7 +36,7 @@ They&rsquo;re bound to the <em>request/response</em> model.</p>
 <h4 id="api-design">API design</h4>
 <p>Although, a saga internally uses asynchronous communication, the very first step
 that starts the saga might be triggered synchronously, via an <em><strong>http request</strong></em> like so</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#960050;background-color:#1e0010">POST /orders
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#960050;background-color:#1e0010">P</span><span style="color:#960050;background-color:#1e0010">O</span><span style="color:#960050;background-color:#1e0010">S</span><span style="color:#960050;background-color:#1e0010">T</span><span style="color:#960050;background-color:#1e0010"> </span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">r</span><span style="color:#960050;background-color:#1e0010">d</span><span style="color:#960050;background-color:#1e0010">e</span><span style="color:#960050;background-color:#1e0010">r</span><span style="color:#960050;background-color:#1e0010">s</span><span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>So now we have to cover the issue of <em>when</em> we send back the response.</p>
 <h4 id="implementing-rollbacks">Implementing rollbacks</h4>
 <p>In a <em><strong>distributed transaction</strong></em> you can execute a <code>rollback</code> statement
@@ -180,15 +180,15 @@ the lock will be released for the next available!</p>
 <p><em><strong>Shedlock</strong></em> needs just another <code>annotation</code> on top of your scheduled task as follows in my example:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Scheduled</span><span style="color:#f92672">(</span>fixedDelay <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;5s&#34;</span><span style="color:#f92672">)</span>
 <span style="color:#a6e22e">@SchedulerLock</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;say-hello-scheduler&#34;</span><span style="color:#f92672">)</span>
-<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">schedule</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-    assertLocked<span style="color:#f92672">();</span>
-    log<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello from {}&#34;</span><span style="color:#f92672">,</span> App<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    assertLocked<span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
+    log<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello from {}&#34;</span><span style="color:#f92672">,</span> App<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
 <span style="color:#f92672">}</span>
 </code></pre></div><p>along with some extra configuration in <code>application.yml</code></p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">shedlock</span>:
-  <span style="color:#f92672">defaults</span>:
-    <span style="color:#f92672">lock-at-most-for</span>: <span style="color:#ae81ff">8s</span>
-    <span style="color:#f92672">lock-at-least-for</span>: <span style="color:#ae81ff">5s</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">shedlock</span>:
+  <span style="color:#66d9ef">defaults</span>:
+    <span style="color:#66d9ef">lock-at-most-for</span>: 8s
+    <span style="color:#66d9ef">lock-at-least-for</span>: 5s
 </code></pre></div><p>Here&rsquo;s the output logs of a demo PoC I did</p>
 <p><img src="./images/proof.png" alt="proof"></p>
 <p>That&rsquo;s it! I hope this blog helped&hellip;</p>

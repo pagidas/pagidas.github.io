@@ -38,14 +38,13 @@ Now that microservices architecture is more frequent when orchestrating a system
 <meta itemprop="description" content="Background Well, where to begin&hellip; Saga is a flow of transactions that updates each service and publishes a message to trigger then next transaction step. This pattern is not something new. It came from a paper back in 1987
 On a very high level, Saga does not use a distributed transaction; it breaks down the transaction into a series of local transactions in each one of the participating services.
 Now that microservices architecture is more frequent when orchestrating a system, plain http request/response communication between microservices can be hard to maintain.">
-<meta itemprop="datePublished" content="2020-12-28T14:19:33+02:00" />
-<meta itemprop="dateModified" content="2020-12-28T14:19:33+02:00" />
-<meta itemprop="wordCount" content="867">
+<meta itemprop="datePublished" content="2020-12-28T14:19:33&#43;02:00" />
+<meta itemprop="dateModified" content="2020-12-28T14:19:33&#43;02:00" />
+<meta itemprop="wordCount" content="865">
 
 
 
 <meta itemprop="keywords" content="async,microservices,sagas,choreography," />
-
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Choreography saga -- asynchronous microservices"/>
 <meta name="twitter:description" content="Background Well, where to begin&hellip; Saga is a flow of transactions that updates each service and publishes a message to trigger then next transaction step. This pattern is not something new. It came from a paper back in 1987
@@ -68,7 +67,7 @@ Now that microservices architecture is more frequent when orchestrating a system
 
 
 
-    <meta property="article:published_time" content="2020-12-28 14:19:33 &#43;0200 EET" />
+    <meta property="article:published_time" content="2020-12-28 14:19:33 &#43;0200 &#43;0200" />
 
 
 
@@ -166,7 +165,7 @@ They&rsquo;re bound to the <em>request/response</em> model.</p>
 <h4 id="api-design">API design</h4>
 <p>Although, a saga internally uses asynchronous communication, the very first step
 that starts the saga might be triggered synchronously, via an <em><strong>http request</strong></em> like so</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#960050;background-color:#1e0010">POST /orders
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#960050;background-color:#1e0010">P</span><span style="color:#960050;background-color:#1e0010">O</span><span style="color:#960050;background-color:#1e0010">S</span><span style="color:#960050;background-color:#1e0010">T</span><span style="color:#960050;background-color:#1e0010"> </span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">r</span><span style="color:#960050;background-color:#1e0010">d</span><span style="color:#960050;background-color:#1e0010">e</span><span style="color:#960050;background-color:#1e0010">r</span><span style="color:#960050;background-color:#1e0010">s</span><span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>So now we have to cover the issue of <em>when</em> we send back the response.</p>
 <h4 id="implementing-rollbacks">Implementing rollbacks</h4>
 <p>In a <em><strong>distributed transaction</strong></em> you can execute a <code>rollback</code> statement
@@ -287,7 +286,7 @@ get your hands in <em><strong>sagas</strong></em> and their challenges</p>
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        867 Words
+        865 Words
       </p>
 
       <p>
@@ -298,7 +297,7 @@ get your hands in <em><strong>sagas</strong></em> and their challenges</p>
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
         
-          2020-12-28 14:19
+          2020-12-28 12:19
         
 
          
@@ -340,7 +339,7 @@ get your hands in <em><strong>sagas</strong></em> and their challenges</p>
                 <footer class="footer">
     <div class="footer__inner">
         <div class="footer__content">
-            <span>&copy; 2020</span>
+            <span>&copy; 2021</span>
             
             
                 <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
