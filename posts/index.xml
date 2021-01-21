@@ -189,7 +189,20 @@ the lock will be released for the next available!</p>
   <span style="color:#66d9ef">defaults</span>:
     <span style="color:#66d9ef">lock-at-most-for</span>: 8s
     <span style="color:#66d9ef">lock-at-least-for</span>: 5s
-</code></pre></div><p>Here&rsquo;s the output logs of a demo PoC I did</p>
+</code></pre></div><p>Now the <code>@Scheduled</code> expects a <code>LockProvider</code> to be declared somewhere. Thus, in my example
+where I used <code>Elasticsearch</code> as my datastore, we would have factory bean method like so:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Factory</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SchedulingLockConfiguration</span> <span style="color:#f92672">{</span>
+    
+    <span style="color:#a6e22e">@Singleton</span>
+    LockProvider <span style="color:#a6e22e">lockProvider</span><span style="color:#f92672">(</span>RestHighLevelClient client<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ElasticsearchLockProvider<span style="color:#f92672">(</span>client<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>In the docs of the library you can find factory bean methods for all the
+datastores that currently the library is integrated and supports to build
+the lock.</p>
+<p>Here&rsquo;s the output logs of a demo PoC I did</p>
 <p><img src="./images/proof.png" alt="proof"></p>
 <p>That&rsquo;s it! I hope this blog helped&hellip;</p>
 <p>The repo can be found right here</p>
