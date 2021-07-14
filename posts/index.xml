@@ -6,8 +6,144 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Mon, 28 Dec 2020 14:19:33 +0200</lastBuildDate>
+        <lastBuildDate>Sun, 27 Jun 2021 14:15:01 +0100</lastBuildDate>
         <atom:link href="https://pagidas.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Integration tests with testcontainers</title>
+            <link>https://pagidas.github.io/posts/testcontainers_demo/</link>
+            <pubDate>Sun, 27 Jun 2021 14:15:01 +0100</pubDate>
+            
+            <guid>https://pagidas.github.io/posts/testcontainers_demo/</guid>
+            <description>Lately&amp;hellip; Not a new thing, but lately I&amp;rsquo;ve been trying to focus more on testing the behaviour of an application rather than its implementation details. Those details are variable; so our behavioural test (Integration test?) shouldn&amp;rsquo;t depend on them.
+For example if our application exposes a RESTful CRUD api, storing the resource into some database &amp;ndash; changing the library used to connect to the database and run queries at it, must not change the fact that our application should still behave the same.</description>
+            <content type="html"><![CDATA[<h3 id="lately">Lately&hellip;</h3>
+<p>Not a new thing, but lately I&rsquo;ve been trying to focus more on testing the behaviour of an
+application rather than its implementation details. Those details are variable; so our
+behavioural test (Integration test?) shouldn&rsquo;t depend on them.</p>
+<p>For example if our application exposes a RESTful CRUD api, storing the resource into
+some database &ndash; changing the library used to connect to the database and run queries at it,
+must not change the fact that our application should still behave the same.</p>
+<p>I&rsquo;m not a fan of <em>mocking</em> external dependencies into my tests, especially if the application
+is heavy on them. I prefer a &ldquo;test through the wire&rdquo;, one that does a real connection.</p>
+<p>It feels like a <code>docker-compose</code> context would be perfect for such testing&hellip;</p>
+<p>I hope you know this already, but if you don&rsquo;t, there is a very interesting library
+wrapping <em><strong>Docker</strong></em> commands, which we can use to set our environment with docker containers
+ready for our testing. And all that programmatically within our test source code.
+And, yes, of course I&rsquo;m talking about <a href="link">Testcontainers</a></p>
+<h3 id="my-demo-app">My Demo app</h3>
+<p>For the sake of this blog post, the demo application I&rsquo;ve designed has
+a variety of dependencies that makes it a bit hard to test overall.</p>
+<p>On a high level, we have a <em><strong>streaming application</strong></em> that processes events
+about files which we need to download from an external api, and then save them
+into an <em><strong>AWS S3</strong></em> bucket.</p>
+<p>The technology I used for the application above is <a href="https://kafka.apache.org/">Kafka</a>,
+and specifically I used the <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/processor-api.html">Processor API</a>
+to create a <em><strong>processor topology</strong></em> to represent my business logic.</p>
+<p>For demoing purposes, the external api from which I download the file to continue the flow,
+I used the <a href="https://www.file.io/">file.io</a> &ndash; in reality it could be any third-party provider.</p>
+<h4 id="topology-graph">Topology graph</h4>
+<p>Our <em><strong>topology graph</strong></em> looks like this
+<img src="images/stream_processing_topology_graph.jpg" alt="image"></p>
+<p>Quite simple, right?</p>
+<p>In code, the DSL describing the above topology is even simpler, once you get
+your hands around <em><strong>Kafka</strong></em></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin">KafkaStreams(StreamsBuilder().build().run {
+
+            addSource(SOURCE_NODE,
+                LongDeserializer(),
+                UploadFileEventDeserializer(),
+                UploadFileEvent.topic)
+
+            addProcessor(PROCESSOR_NODE,
+                ProcessorSupplier { UploadFileEventProcessor(fileIOApi, s3Config, s3) },
+                SOURCE_NODE)
+
+            addSink(SINK_SUCCESS_NODE,
+                UploadFileSuccessEvent.topic,
+                LongSerializer(),
+                UploadFileEventBaseSerializer(),
+                PROCESSOR_NODE)
+
+            addSink(SINK_FAILURE_NODE,
+                UploadFileFailureEvent.topic,
+                LongSerializer(),
+                UploadFileEventBaseSerializer(),
+                PROCESSOR_NODE)
+    
+    }, <span style="color:#66d9ef">this</span>.kafkaConfig.toProperties())
+</code></pre></div><p>Our business logic lives into this <code>UploadFileEventProcessor</code> instantiated by <em><strong>Kafka&rsquo;s</strong></em> <code>ProcessorSupplier</code>.</p>
+<h4 id="solution-diagram">Solution diagram</h4>
+<p><img src="images/stream_solution_design.jpg" alt="image"></p>
+<h4 id="setting-up-testcontainers">Setting up Testcontainers</h4>
+<p>First is our gradle imports, and <em><strong>Testcontainers</strong></em> thankfully provides us with a <em><strong>bom</strong></em> we can use,
+so we can have the same version across all libraries for no conflicts.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin">implementation platform(<span style="color:#e6db74">&#34;org.testcontainers:testcontainers-bom:$testContainersVersion&#34;</span>)
+testImplementation <span style="color:#e6db74">&#34;org.testcontainers:kafka&#34;</span>
+testImplementation <span style="color:#e6db74">&#34;org.testcontainers:mockserver&#34;</span>
+</code></pre></div><p>They do also provide specific containers of widely used technologies to abstract the way we spin them up.</p>
+<p>As seen above <code>org.testcontainers:kafka</code> and <code>org.testcontainers:mockserver</code>.</p>
+<p>For other containers that there is no specific module, we can of course use the <code>GenericContainer</code>
+which works as expected, the same way you&rsquo;d create and run an instance of a docker container.</p>
+<p>There are two ways we can use <em><strong>Testcontainers</strong></em> functionality:</p>
+<ol>
+<li>We can let the library handle the containers&rsquo; lifecycle</li>
+<li>Or we can control it manually.</li>
+</ol>
+<p>For the automated containers&rsquo; lifecycle control, we have to import another module:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin">testImplementation <span style="color:#e6db74">&#34;org.testcontainers:junit-jupiter:$junit5Version&#34;</span>
+</code></pre></div><p>This adds some annotations where we can use to declare containers that are maintained by the library &ndash; <code>@Container</code>.</p>
+<p>In our own example I use the manual approach to have singleton containers.
+You can read more about the <em><strong>JUnit5 support</strong></em> <a href="https://www.testcontainers.org/test_framework_integration/junit_5/">here</a> 👈</p>
+<p>To setup singleton containers with manual lifecycle control, we have to follow a <em><strong>base class</strong></em> pattern:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin"><span style="color:#66d9ef">open</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TestContainersBase</span> {
+    <span style="color:#66d9ef">companion</span> <span style="color:#66d9ef">object</span> {
+        <span style="color:#75715e">// declare your containers...
+</span><span style="color:#75715e"></span>        
+        init {
+            <span style="color:#75715e">// start your containers
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// plus whatever is needed for the context to load properly
+</span><span style="color:#75715e"></span>        }
+    }
+}
+</code></pre></div><p>Note how we declare containers that are supported by the framework, and also containers using the <code>GenericContainer</code> type.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">val</span> kafkaContainer = KafkaContainer(DockerImageName.parse(<span style="color:#e6db74">&#34;confluentinc/cp-kafka:5.4.3&#34;</span>)).apply { 
+    withExposedPorts(KAFKA_CONTAINER_PORT)
+}
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">val</span> mockServerContainer = MockServerContainer(DockerImageName.parse(<span style="color:#e6db74">&#34;mockserver/mockserver&#34;</span>)).apply {
+    withExposedPorts(MOCK_SERVER_CONTAINER_PORT)
+}
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">val</span> s3MockContainer = GenericContainer&lt;Nothing&gt;(DockerImageName.parse(<span style="color:#e6db74">&#34;adobe/s3mock&#34;</span>)).apply {
+    withExposedPorts(S3_MOCK_CONTAINER_PORT)
+    withEnv(<span style="color:#e6db74">&#34;initialBuckets&#34;</span>, <span style="color:#e6db74">&#34;file-uploads&#34;</span>)
+}
+</code></pre></div><p>To test that we upload to <em><strong>AWS S3</strong></em> I used <a href="https://github.com/adobe/S3Mock">S3Mock</a>
+but we could use <a href="https://github.com/localstack/localstack">LocalStack</a>.</p>
+<p>Similarly, to test we download the file
+from a third-party api, I used <a href="https://www.mock-server.com/">MockServer</a> but another good alternative is <a href="http://wiremock.org/">Wiremock</a>.
+Both of those solutions we can add pairs of <code>request/response</code> expectations, which sounds like <em>mocking</em>, yet it isn&rsquo;t.
+They both run a real <code>http</code> server.</p>
+<p>Our <code>init {}</code> would simply look like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin">init {
+    <span style="color:#75715e">// init containers
+</span><span style="color:#75715e"></span>    kafkaContainer.start()
+    mockServerContainer.start()
+    s3MockContainer.start()
+}
+</code></pre></div><p>Now you may wonder how do we connect to those docker containers when they are started&hellip;</p>
+<p>We already exposed the ports when we declared the containers in the example up above, but those are not the ports that are actually mapped
+into our <code>localhost</code>. Rather, <em><strong>Testcontainers</strong></em> actually exposes them on random free ones to avoid port collisions.</p>
+<p>At runtime, we can ask <em><strong>Testcontainers</strong></em> what is the actual mapped port given the port of the container we declared, like so:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-kotlin" data-lang="kotlin">s3MockContainer.getMappedPort(S3_MOCK_CONTAINER_PORT)
+</code></pre></div><p>As soon as we have the <code>host</code> and <code>port</code> that our docker containers run at, the only thing we are left
+to do is just pass them into our application&rsquo;s config via environment, so we can start testing the behaviour
+of our application.</p>
+<p><img src="images/tests_intellij.png" alt="image"></p>
+<h3 id="github-repo">Github repo</h3>
+<p>The demo application is located here 👇</p>
+<pre><code>https://github.com/
+</code></pre>]]></content>
+        </item>
         
         <item>
             <title>Choreography saga -- asynchronous microservices</title>
