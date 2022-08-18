@@ -3,6 +3,41 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://pagidas.github.io/tags/hexagonal_architecture/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/posts/ports_and_adapters_pattern/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/tags/ports_and_adapters_pattern/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/posts/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/tags/solid_principles/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/tags/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pagidas.github.io/</loc>
+    <lastmod>2021-12-28T17:24:07+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://pagidas.github.io/tags/integration-tests/</loc>
     <lastmod>2021-06-27T14:15:01+01:00</lastmod>
   </url>
@@ -28,22 +63,7 @@
   </url>
   
   <url>
-    <loc>https://pagidas.github.io/posts/</loc>
-    <lastmod>2021-06-27T14:15:01+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pagidas.github.io/tags/</loc>
-    <lastmod>2021-06-27T14:15:01+01:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://pagidas.github.io/tags/testcontainers/</loc>
-    <lastmod>2021-06-27T14:15:01+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pagidas.github.io/</loc>
     <lastmod>2021-06-27T14:15:01+01:00</lastmod>
   </url>
   
